@@ -1,22 +1,25 @@
 package com.example.dropall.mixin;
 
-import net.minecraft.client.gui.screen.ingame.AbstractInventoryScreen;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.client.gui.widget.ButtonWidget;
-import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.screen.PlayerScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(InventoryScreen.class)
-public abstract class InventoryScreenMixin extends AbstractInventoryScreen<PlayerScreenHandler> {
+public abstract class InventoryScreenMixin extends Screen {
 
-    public InventoryScreenMixin(PlayerScreenHandler screenHandler, PlayerInventory playerInventory, Text text) {
-        super(screenHandler, playerInventory, text);
+    @Shadow
+    private int x;
+
+    protected InventoryScreenMixin(Text title) {
+        super(title);
     }
 
     @Inject(method = "init", at = @At("TAIL"))
@@ -38,13 +41,13 @@ public abstract class InventoryScreenMixin extends AbstractInventoryScreen<Playe
 
         PlayerScreenHandler handler = this.client.player.playerScreenHandler;
 
-        // Slots: 9 to 45 (main inventory, hotbar, offhand)
+        // Слоты с 9 по 45: инвентарь, хотбар и левая рука
         for (int slotId = 9; slotId <= 45; slotId++) {
             if (handler.getSlot(slotId).hasStack()) {
                 this.client.interactionManager.clickSlot(
                     handler.syncId,
                     slotId,
-                    1,
+                    1, // Выбрасывает весь стек предметов (Ctrl+Q)
                     SlotActionType.THROW,
                     this.client.player
                 );
