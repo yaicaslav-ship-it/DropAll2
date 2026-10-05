@@ -8,9 +8,7 @@ import net.minecraft.screen.GenericContainerScreenHandler;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(GenericContainerScreen.class)
 public abstract class GenericContainerScreenMixin extends HandledScreen<GenericContainerScreenHandler> {
@@ -19,9 +17,11 @@ public abstract class GenericContainerScreenMixin extends HandledScreen<GenericC
         super(handler, inventory, title);
     }
 
-    @Inject(method = "init", at = @At("TAIL"))
-    private void addDropAllChestButton(CallbackInfo ci) {
-        // Размещаем кнопку в верхнем правом углу окна сундука
+    @Override
+    protected void init() {
+        super.init();
+
+        // Кнопка в верхнем правом углу панели сундука
         int buttonX = this.x + this.backgroundWidth - 62;
         int buttonY = this.y + 4;
 
@@ -32,22 +32,21 @@ public abstract class GenericContainerScreenMixin extends HandledScreen<GenericC
         );
     }
 
+    @Unique
     private void dropChestItems() {
         if (this.client == null || this.client.interactionManager == null || this.client.player == null) {
             return;
         }
 
         GenericContainerScreenHandler screenHandler = this.getScreenHandler();
-        // Количество слотов именно сундука (строк * 9: для одинарного 27, для двойного 54)
         int containerSlotsCount = screenHandler.getRows() * 9;
 
-        // Перебираем только слоты сундука (от 0 до containerSlotsCount - 1), инвентарь игрока не трогаем
         for (int slotId = 0; slotId < containerSlotsCount; slotId++) {
             if (screenHandler.getSlot(slotId).hasStack()) {
                 this.client.interactionManager.clickSlot(
                     screenHandler.syncId,
                     slotId,
-                    1, // 1 + THROW = выбросить всю пачку
+                    1,
                     SlotActionType.THROW,
                     this.client.player
                 );
