@@ -21,6 +21,14 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
+      # Если wrapper отсутствует, генерируем его автоматически
+      - name: Generate Gradle Wrapper if missing
+        run: |
+          if [ ! -f "gradlew" ]; then
+            echo "Gradle wrapper not found, generating..."
+            gradle wrapper --gradle-version 8.10.2
+          fi
+
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
