@@ -21,7 +21,6 @@ public abstract class InventoryScreenMixin extends HandledScreen<PlayerScreenHan
 
     @Inject(method = "init", at = @At("TAIL"))
     private void addDropAllButton(CallbackInfo ci) {
-        // Поле this.x доступно напрямую из унаследованного HandledScreen (никакой @Shadow не нужен)
         int buttonX = this.x + 104;
         int buttonY = this.height / 2 - 22;
 
